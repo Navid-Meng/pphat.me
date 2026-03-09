@@ -2,9 +2,19 @@ import { NEXT_PUBLIC_APP_URL } from "../lib/constants";
 import { readdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
+function getBaseUrl(): string {
+    const raw = NEXT_PUBLIC_APP_URL.trim();
+    const parsed = new URL(raw);
+    if (parsed.hostname.startsWith('www.')) {
+        parsed.hostname = parsed.hostname.slice(4);
+    }
+    return parsed.toString().replace(/\/$/, '');
+}
+
 // Function to generate image sitemap
 export async function generateImageSitemap() {
     try {
+    const baseUrl = getBaseUrl();
         // Path to your gallery images
         const imageDir = join(process.cwd(), 'public', 'assets', 'gallery', 'WEBP');
 
@@ -21,21 +31,21 @@ export async function generateImageSitemap() {
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
             '  <url>',
-            `    <loc>${NEXT_PUBLIC_APP_URL}/gallery</loc>`,
+            `    <loc>${baseUrl}/gallery</loc>`,
             imageFiles.map(file => {
                 const imageName = file.split('.')[0];
                 return [
                     '    <image:image>',
-                    `      <image:loc>${NEXT_PUBLIC_APP_URL}/assets/gallery/WEBP/${file}</image:loc>`,
+                    `      <image:loc>${baseUrl}/assets/gallery/WEBP/${file}</image:loc>`,
                     `      <image:title>Leat Sophat - ${imageName}</image:title>`,
                     '    </image:image>'
                 ].join('\n');
             }).join('\n'),
             '  </url>',
             '  <url>',
-            `    <loc>${NEXT_PUBLIC_APP_URL}</loc>`,
+            `    <loc>${baseUrl}</loc>`,
             '    <image:image>',
-            `      <image:loc>${NEXT_PUBLIC_APP_URL}/assets/avatars/hero.webp</image:loc>`,
+            `      <image:loc>${baseUrl}/assets/avatars/hero.webp</image:loc>`,
             '      <image:title>Leat Sophat - Senior Front-end Developer and UI/UX Designer</image:title>',
             '      <image:caption>Profile photo of Leat Sophat</image:caption>',
             '    </image:image>',

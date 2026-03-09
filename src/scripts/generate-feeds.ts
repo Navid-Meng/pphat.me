@@ -33,7 +33,12 @@ function toIso(value: string): string {
 }
 
 function getBaseUrl(): string {
-    return NEXT_PUBLIC_APP_URL.trim().replace(/\/$/, '');
+    const raw = NEXT_PUBLIC_APP_URL.trim();
+    const parsed = new URL(raw);
+    if (parsed.hostname.startsWith('www.')) {
+        parsed.hostname = parsed.hostname.slice(4);
+    }
+    return parsed.toString().replace(/\/$/, '');
 }
 
 function readPublishedPosts(): PostData[] {
