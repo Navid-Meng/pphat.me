@@ -60,7 +60,7 @@ export default function AddPostPage() {
         authors: [{
             name: "PPhat DEv",
             profile: "",
-            url: "https://pphat.top"
+            url: "https://pphat.me"
         }]
     });
 
@@ -131,7 +131,7 @@ export default function AddPostPage() {
                 authors: [{
                     name: "PPhat DEv",
                     profile: "https://github.com/pphatdev.png",
-                    url: "https://pphat.top"
+                    url: "https://pphat.me"
                 }]
             };
 

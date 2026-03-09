@@ -24,10 +24,10 @@ export default function GoogleIndexingVerification() {
                 {`{
                         "@context": "https://schema.org",
                         "@type": "WebSite",
-                        "url": "https://pphat.top/",
+                        "url": "https://pphat.me/",
                         "potentialAction": {
                             "@type": "SearchAction",
-                            "target": "https://pphat.top/search?q={search_term_string}",
+                            "target": "https://pphat.me/search?q={search_term_string}",
                             "query-input": "required name=search_term_string"
                         }
                 }`}
@@ -38,7 +38,7 @@ export default function GoogleIndexingVerification() {
                     "@type": "Person",
                     "name": "${PERSON_NAME}",
                     "jobTitle": "${PERSON_JOB_TITLE}",
-                    "url": "https://pphat.top/",
+                    "url": "https://pphat.me/",
                     "sameAs": [
                     "https://github.com/pphatdev",
                     "https://kh.linkedin.com/in/pphatdev",

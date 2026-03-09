@@ -47,3 +47,6 @@ next-env.d.ts
 public/image-sitemap.xml
 public/sitemap.xml
 public/site.webmanifest
+public/rss.xml
+public/atom.xml
+public/feed.json

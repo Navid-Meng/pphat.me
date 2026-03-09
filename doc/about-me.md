@@ -58,7 +58,7 @@ I'm always interested in discussing new opportunities, collaborating on exciting
 
 - 💼 [LinkedIn](https://linkedin.com/in/pphatdev)
 - 📧 [Email](mailto:info.sophat@gmail.com)
-- 🌐 [Portfolio](https://pphat.top)
+- 🌐 [Portfolio](https://pphat.me)
 - 💻 [GitHub](https://github.com/pphatdev)
 
 ---

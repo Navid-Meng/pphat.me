@@ -6,5 +6,5 @@ Disallow: /(auth)/*
 Disallow: /data/
 Disallow: /google*.html
 
-Sitemap: https://pphat.top/sitemap.xml
-Sitemap: https://pphat.top/image-sitemap.xml
+Sitemap: https://pphat.me/sitemap.xml
+Sitemap: https://pphat.me/image-sitemap.xml

@@ -13,7 +13,7 @@ interface PostData {
 // This file generates a dynamic sitemap using Next.js API
 // It only includes canonical URLs that return 200 status codes
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://pphat.top';
+    const baseUrl = 'https://pphat.me';
 
     // Get current date for lastModified
     const currentDate = new Date();

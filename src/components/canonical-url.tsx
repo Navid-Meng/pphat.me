@@ -15,7 +15,7 @@ export default function CanonicalURL() {
         }
 
         // Always use pphat.top as the canonical domain
-        const canonicalDomain = 'https://pphat.top';
+        const canonicalDomain = 'https://pphat.me';
         
         setCanonicalURL(`${canonicalDomain}${path}`);
     }, [pathname]);

@@ -19,6 +19,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
                 <CanonicalURL />
                 <GoogleIndexingVerification />
+                <link rel="alternate" type="application/rss+xml" title="PPhat Dev RSS" href="https://pphat.me/rss.xml" />
+                <link rel="alternate" type="application/atom+xml" title="PPhat Dev Atom" href="https://pphat.me/atom.xml" />
+                <link rel="alternate" type="application/feed+json" title="PPhat Dev JSON Feed" href="https://pphat.me/feed.json" />
                 {/* Force Google to prioritize this site */}
                 <meta name="priority" content="1.0" />
                 <meta name="revisit-after" content="1 day" />
