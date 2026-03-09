@@ -6,6 +6,7 @@ interface PostData {
     slug: string;
     title: string;
     description?: string;
+    thumbnail?: string;
     published: boolean;
     createdAt: string;
     updatedAt?: string;
@@ -24,12 +25,26 @@ function xmlEscape(value: string): string {
         .replace(/'/g, '&apos;');
 }
 
+function toCdata(value: string): string {
+    // Split embedded CDATA terminators to keep valid XML.
+    return `<![CDATA[${value.replace(/\]\]>/g, ']]]]><![CDATA[>')}]]>`;
+}
+
 function toRfc2822(value: string): string {
     return new Date(value).toUTCString();
 }
 
 function toIso(value: string): string {
     return new Date(value).toISOString();
+}
+
+function getImageMimeType(imageUrl: string): string {
+    const cleanUrl = imageUrl.split('?')[0].toLowerCase();
+    if (cleanUrl.endsWith('.png')) return 'image/png';
+    if (cleanUrl.endsWith('.gif')) return 'image/gif';
+    if (cleanUrl.endsWith('.webp')) return 'image/webp';
+    if (cleanUrl.endsWith('.svg')) return 'image/svg+xml';
+    return 'image/jpeg';
 }
 
 function getBaseUrl(): string {
@@ -57,6 +72,7 @@ function readPublishedPosts(): PostData[] {
 function buildRss(posts: PostData[], baseUrl: string): string {
     const feedUrl = `${baseUrl}/rss.xml`;
     const siteUrl = `${baseUrl}/posts`;
+    const channelImageUrl = `${baseUrl}/assets/icons/android-chrome-512x512.png`;
     const updated = posts[0]?.updatedAt || posts[0]?.createdAt || new Date().toISOString();
 
     const items = posts
@@ -65,14 +81,19 @@ function buildRss(posts: PostData[], baseUrl: string): string {
             const published = post.createdAt;
             const updatedAt = post.updatedAt || post.createdAt;
             const description = post.description || '';
+            const thumbnail = post.thumbnail || channelImageUrl;
+            const imageType = getImageMimeType(thumbnail);
 
             return [
                 '  <item>',
-                `    <title>${xmlEscape(post.title)}</title>`,
+                `    <title>${toCdata(post.title)}</title>`,
                 `    <link>${xmlEscape(postUrl)}</link>`,
                 `    <guid isPermaLink=\"true\">${xmlEscape(postUrl)}</guid>`,
                 `    <pubDate>${toRfc2822(published)}</pubDate>`,
-                `    <description>${xmlEscape(description)}</description>`,
+                `    <description>${toCdata(description)}</description>`,
+                `    <enclosure url=\"${xmlEscape(thumbnail)}\" type=\"${imageType}\" />`,
+                `    <media:content url=\"${xmlEscape(thumbnail)}\" medium=\"image\" type=\"${imageType}\" />`,
+                `    <media:thumbnail url=\"${xmlEscape(thumbnail)}\" />`,
                 `    <dc:date>${toIso(updatedAt)}</dc:date>`,
                 '  </item>',
             ].join('\n');
@@ -81,12 +102,17 @@ function buildRss(posts: PostData[], baseUrl: string): string {
 
     return [
         '<?xml version=\"1.0\" encoding=\"UTF-8\"?>',
-        '<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">',
+        '<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:media=\"http://search.yahoo.com/mrss/\">',
         '<channel>',
-        `  <title>${xmlEscape(appTitle)}</title>`,
+        `  <title>${toCdata(appTitle)}</title>`,
         `  <link>${xmlEscape(siteUrl)}</link>`,
-        `  <description>${xmlEscape(appDescriptions)}</description>`,
+        `  <description>${toCdata(appDescriptions)}</description>`,
         `  <language>en-US</language>`,
+        '  <image>',
+        `    <url>${xmlEscape(channelImageUrl)}</url>`,
+        `    <title>${toCdata(appTitle)}</title>`,
+        `    <link>${xmlEscape(baseUrl)}</link>`,
+        '  </image>',
         `  <lastBuildDate>${toRfc2822(updated)}</lastBuildDate>`,
         `  <atom:link href=\"${xmlEscape(feedUrl)}\" rel=\"self\" type=\"application/rss+xml\" />`,
         items,

@@ -112,6 +112,6 @@ if (fs.existsSync(headersPath)) {
 console.log('\n✨ SEO test completed!\n');
 console.log('📝 Next steps:');
 console.log('\t1. Deploy these changes to Netlify');
-console.log('\t2. Check the live site headers with: curl -I https://pphat.me');
+console.log('\t2. Check the live site headers with: curl -I https://www.pphat.me');
 console.log('\t3. Verify robots meta tag is not "noindex"');
 console.log('\t4. Test with Google Search Console');

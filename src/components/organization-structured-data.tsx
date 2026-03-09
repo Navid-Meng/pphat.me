@@ -4,7 +4,7 @@ import JsonLd from './JsonLd';
 
 const OrganizationStructuredData = () => {
 
-    // const url = process.env.NEXT_PUBLIC_APP_URL || 'https://pphat.me';
+    // const url = process.env.NEXT_PUBLIC_APP_URL || 'https://www.pphat.me';
     // const logoUrl = `${url}/assets/logo/logo-solid-dark-mode.png`;
 
     return (
@@ -24,7 +24,7 @@ const OrganizationStructuredData = () => {
                         //     "contactType": "Customer Service"
                         // },
                         "sameAs": [
-                            "https://pphat.me",
+                            "https://www.pphat.me",
                             "https://figma.com/PPhat",
                             "https://kh.linkedin.com/in/pphatdev",
                             "https://x.com/pphatdev",

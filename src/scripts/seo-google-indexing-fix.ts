@@ -90,7 +90,7 @@ async function tryIndexNowSubmission(sitemapUrl: string): Promise<CheckResult> {
 }
 
 export async function runIndexingFix(): Promise<void> {
-	const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://pphat.me').replace(/\/$/, '');
+	const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://www.pphat.me').replace(/\/$/, '');
 	const sitemapUrl = `${baseUrl}/sitemap.xml`;
 
 	console.log(`Pinging search engines with sitemap: ${sitemapUrl}`);
