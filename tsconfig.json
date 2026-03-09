@@ -18,8 +18,9 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
+      "src/*": ["./src/*"],
+      "public/*": ["./public/*"],
       "@components/*": ["./src/components/*"],
       "@ui/*": ["./src/components/ui/*"],
       "@app/*": ["./src/app/*"],
