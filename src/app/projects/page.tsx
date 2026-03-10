@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import originData from 'public/data/project.json';
 import InfiniteScroll from "@components/infinit-scroll";
 import { Spinner } from "@components/ui/loading";
-import { staticPaginationJSON } from "@lib/functions/pagination-list";
 import { ProjectHero } from "@components/heros/project-hero";
 import { ProjectCard } from "@components/cards/project-card";
 import { Project } from "../../lib/types/interfaces";
@@ -26,19 +24,13 @@ const Projects = () => {
         setLoading(true);
 
         try {
-            const { posts } = originData;
-            const postData = (posts as Project[]).filter(project => project.published === true);
+            const response = await fetch(`/api/projects?page=${page}&limit=${limit}`);
 
-            const { data } = staticPaginationJSON(
-                postData,
-                postData.length,
-                {
-                    page: page,
-                    limit: limit,
-                    search: null,
-                    sort: 'asc',
-                }
-            );
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const { data, hasMore: apiHasMore } = await response.json();
 
             setProjects((prev) => {
                 const existingIds = new Set(prev.map(p => p.id));
@@ -46,11 +38,10 @@ const Projects = () => {
                 return [...prev, ...newItems];
             });
             setPage((prev) => prev + 1);
-
-            if (data.length < limit) setHasMore(false);
+            setHasMore(apiHasMore);
 
         } catch (error) {
-            console.error('Error fetching posts:', error);
+            console.error('Error fetching projects:', error);
             setHasMore(false);
         } finally {
             setLoading(false);
