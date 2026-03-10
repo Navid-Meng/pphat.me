@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { NEXT_PUBLIC_APP_URL, appDescriptions, appTitle } from '../lib/constants';
 
@@ -56,17 +56,61 @@ function getBaseUrl(): string {
     return parsed.toString().replace(/\/$/, '');
 }
 
-function readPublishedPosts(): PostData[] {
-    const postsPath = join(process.cwd(), 'public/data/post.json');
-    const data = JSON.parse(readFileSync(postsPath, 'utf-8')) as PostsFile;
+function parseFrontmatter(content: string): Record<string, unknown> {
+    const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+    if (!match) return {};
+    const yaml = match[1];
+    const data: Record<string, unknown> = {};
+    for (const line of yaml.split('\n')) {
+        const m = line.match(/^(\w+):\s*(.+)/);
+        if (m) {
+            let val: unknown = m[2].trim();
+            if (val === 'true') val = true;
+            else if (val === 'false') val = false;
+            else if (typeof val === 'string' && val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+            data[m[1]] = val;
+        }
+    }
+    return data;
+}
 
-    return data.posts
-        .filter((post) => post.published)
-        .sort((a, b) => {
-            const aTime = new Date(a.updatedAt || a.createdAt).getTime();
-            const bTime = new Date(b.updatedAt || b.createdAt).getTime();
-            return bTime - aTime;
+function findMarkdownFilesInDir(dir: string): string[] {
+    if (!existsSync(dir)) return [];
+    const results: string[] = [];
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const fullPath = join(dir, entry.name);
+        if (entry.isDirectory()) results.push(...findMarkdownFilesInDir(fullPath));
+        else if (entry.name.endsWith('.md') || entry.name.endsWith('.mdx')) results.push(fullPath);
+    }
+    return results;
+}
+
+function readPublishedPosts(): PostData[] {
+    const postsDir = join(process.cwd(), 'content', 'posts');
+    const files = findMarkdownFilesInDir(postsDir);
+    const posts: PostData[] = [];
+
+    for (const file of files) {
+        const raw = readFileSync(file, 'utf-8');
+        const data = parseFrontmatter(raw);
+        if (data.published !== true) continue;
+
+        posts.push({
+            slug: data.slug as string || '',
+            title: data.title as string || '',
+            description: data.description as string || '',
+            thumbnail: data.thumbnail as string || '',
+            published: true,
+            createdAt: data.createdAt as string || '',
+            updatedAt: data.updatedAt as string || undefined,
         });
+    }
+
+    return posts.sort((a, b) => {
+        const aTime = new Date(a.updatedAt || a.createdAt).getTime();
+        const bTime = new Date(b.updatedAt || b.createdAt).getTime();
+        return bTime - aTime;
+    });
 }
 
 function buildRss(posts: PostData[], baseUrl: string): string {
