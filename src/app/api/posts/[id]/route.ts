@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, Post } from '@lib/db/post';
+import { getAllPosts, getPostBySlug, invalidateCache, type PostEntry } from '@lib/content';
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
 
 interface Params {
     params: Promise<{ id: string; }>;
@@ -8,7 +11,8 @@ interface Params {
 export async function GET(request: NextRequest, props: Params) {
     const params = await props.params;
     try {
-        const post = db.getById<Post>('posts', params.id);
+        // Try by slug first, then by id
+        const post = getPostBySlug(params.id) ?? getAllPosts().find(p => p.id === params.id);
 
         if (!post) {
             return NextResponse.json({ error: 'Post not found' }, { status: 404 });
@@ -21,64 +25,51 @@ export async function GET(request: NextRequest, props: Params) {
     }
 }
 
+function writePostToFile(post: PostEntry, markdownContent: string) {
+    const dir = path.join(process.cwd(), 'content', 'posts', post.slug);
+    fs.mkdirSync(dir, { recursive: true });
+
+    const frontmatter: Record<string, unknown> = {
+        title: post.title,
+        slug: post.slug,
+        description: post.description,
+        tags: post.tags,
+        authors: post.authors,
+        thumbnail: post.thumbnail,
+        published: post.published,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+    };
+
+    const fileContent = matter.stringify(markdownContent, frontmatter);
+    fs.writeFileSync(path.join(dir, 'index.md'), fileContent, 'utf8');
+    invalidateCache();
+}
+
 export async function PUT(request: NextRequest, props: Params) {
     const params = await props.params;
     try {
         const body = await request.json();
 
-        // Get existing post first to ensure it exists and preserve certain fields
-        const existingPost = db.getById<Post>('posts', params.id);
+        const existingPost = getPostBySlug(params.id) ?? getAllPosts().find(p => p.id === params.id);
         if (!existingPost) {
             return NextResponse.json({ error: 'Post not found' }, { status: 404 });
         }
 
-        // Validate required fields if they are being updated
         if (body.title && typeof body.title !== 'string') {
-            return NextResponse.json(
-                { error: 'Title must be a string' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'Title must be a string' }, { status: 400 });
         }
 
-        if (body.content && typeof body.content !== 'string') {
-            return NextResponse.json(
-                { error: 'Content must be a string' },
-                { status: 400 }
-            );
-        }
-
-        // Check for duplicate title if title is being updated
-        if (body.title && body.title.trim() !== existingPost.title) {
-            const allPosts = db.getAll<Post>('posts', '', 1, -1).data;
-            const duplicateTitle = allPosts.find(post =>
-                post.id !== params.id && 
-                post.title.toLowerCase() === body.title.trim().toLowerCase()
-            );
-
-            if (duplicateTitle) {
-                return NextResponse.json(
-                    { error: 'A post with this title already exists' },
-                    { status: 409 }
-                );
-            }
-        }
-
-        // Prepare update data
-        const updateData = {
+        const updatedPost: PostEntry = {
+            ...existingPost,
             ...body,
-            id: existingPost.id, // Ensure ID doesn't change
-            createdAt: existingPost.createdAt, // Preserve creation date
-            updatedAt: new Date().toISOString(), // Update modification time
-            // Update slug if title is changed
-            ...(body.title && {
-                slug: body.title.trim()
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/(^-|-$)/g, '')
-            })
+            id: existingPost.id,
+            createdAt: existingPost.createdAt,
+            updatedAt: new Date().toISOString(),
+            slug: existingPost.slug, // Keep original slug to avoid breaking URLs
         };
 
-        const updatedPost = db.update<Post>('posts', params.id, updateData);
+        writePostToFile(updatedPost, body.content || existingPost.content);
 
         return NextResponse.json({
             message: 'Post updated successfully',
@@ -86,15 +77,9 @@ export async function PUT(request: NextRequest, props: Params) {
         });
     } catch (error) {
         console.error('Error updating post:', error);
-        
-        // Handle JSON parsing errors
         if (error instanceof SyntaxError) {
-            return NextResponse.json(
-                { error: 'Invalid JSON format in request body' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'Invalid JSON format in request body' }, { status: 400 });
         }
-
         return NextResponse.json({ error: 'Failed to update post' }, { status: 500 });
     }
 }
@@ -102,21 +87,20 @@ export async function PUT(request: NextRequest, props: Params) {
 export async function DELETE(request: NextRequest, props: Params) {
     const params = await props.params;
     try {
-        // Check if post exists before deletion
-        const existingPost = db.getById<Post>('posts', params.id);
+        const existingPost = getPostBySlug(params.id) ?? getAllPosts().find(p => p.id === params.id);
         if (!existingPost) {
             return NextResponse.json({ error: 'Post not found' }, { status: 404 });
         }
 
-        const deleted = db.delete('posts', params.id);
-
-        if (!deleted) {
-            return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });
+        const dir = path.join(process.cwd(), 'content', 'posts', existingPost.slug);
+        if (fs.existsSync(dir)) {
+            fs.rmSync(dir, { recursive: true });
         }
+        invalidateCache();
 
-        return NextResponse.json({ 
+        return NextResponse.json({
             message: 'Post deleted successfully',
-            success: true 
+            success: true
         });
     } catch (error) {
         console.error('Error deleting post:', error);
@@ -129,84 +113,33 @@ export async function PATCH(request: NextRequest, props: Params) {
     try {
         const body = await request.json();
 
-        // Get existing post first to ensure it exists
-        const existingPost = db.getById<Post>('posts', params.id);
+        const existingPost = getPostBySlug(params.id) ?? getAllPosts().find(p => p.id === params.id);
         if (!existingPost) {
             return NextResponse.json({ error: 'Post not found' }, { status: 404 });
         }
 
-        // Validate only the fields being updated
-        const updates: Partial<Post> = {};
+        const updates: Partial<PostEntry> = {};
 
-        // Validate and process title if provided
         if (body.title !== undefined) {
             if (typeof body.title !== 'string' || body.title.trim().length === 0) {
-                return NextResponse.json(
-                    { error: 'Title must be a non-empty string' },
-                    { status: 400 }
-                );
+                return NextResponse.json({ error: 'Title must be a non-empty string' }, { status: 400 });
             }
-
-            // Check for duplicate title
-            if (body.title.trim() !== existingPost.title) {
-                const allPosts = db.getAll<Post>('posts', '', 1, -1).data;
-                const duplicateTitle = allPosts.find(post =>
-                    post.id !== params.id && 
-                    post.title.toLowerCase() === body.title.trim().toLowerCase()
-                );
-
-                if (duplicateTitle) {
-                    return NextResponse.json(
-                        { error: 'A post with this title already exists' },
-                        { status: 409 }
-                    );
-                }
-            }
-
             updates.title = body.title.trim();
-            // Auto-update slug when title changes
-            updates.slug = body.title.trim()
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '');
         }
+        if (body.content !== undefined) updates.content = body.content;
+        if (body.published !== undefined) updates.published = Boolean(body.published);
+        if (body.description !== undefined) updates.description = String(body.description).trim();
+        if (body.tags !== undefined && Array.isArray(body.tags)) updates.tags = body.tags;
+        if (body.authors !== undefined && Array.isArray(body.authors)) updates.authors = body.authors;
+        if (body.thumbnail !== undefined) updates.thumbnail = String(body.thumbnail).trim();
 
-        // Validate and process content if provided
-        if (body.content !== undefined) {
-            if (typeof body.content !== 'string') {
-                return NextResponse.json(
-                    { error: 'Content must be a string' },
-                    { status: 400 }
-                );
-            }
-            updates.content = body.content;
-        }
+        const updatedPost: PostEntry = {
+            ...existingPost,
+            ...updates,
+            updatedAt: new Date().toISOString(),
+        };
 
-        // Process other optional fields
-        if (body.published !== undefined) {
-            updates.published = Boolean(body.published);
-        }
-
-        if (body.description !== undefined && typeof body.description === 'string') {
-            updates.description = body.description.trim();
-        }
-
-        if (body.tags !== undefined && Array.isArray(body.tags)) {
-            updates.tags = body.tags;
-        }
-
-        if (body.authors !== undefined && Array.isArray(body.authors)) {
-            updates.authors = body.authors;
-        }
-
-        if (body.thumbnail !== undefined && typeof body.thumbnail === 'string') {
-            updates.thumbnail = body.thumbnail.trim();
-        }
-
-        // Always update the modification time
-        updates.updatedAt = new Date().toISOString();
-
-        const updatedPost = db.update<Post>('posts', params.id, updates);
+        writePostToFile(updatedPost, updatedPost.content);
 
         return NextResponse.json({
             message: 'Post updated successfully',
@@ -214,15 +147,9 @@ export async function PATCH(request: NextRequest, props: Params) {
         });
     } catch (error) {
         console.error('Error updating post:', error);
-        
-        // Handle JSON parsing errors
         if (error instanceof SyntaxError) {
-            return NextResponse.json(
-                { error: 'Invalid JSON format in request body' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'Invalid JSON format in request body' }, { status: 400 });
         }
-
         return NextResponse.json({ error: 'Failed to update post' }, { status: 500 });
     }
 }

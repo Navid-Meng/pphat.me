@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, Post } from '@lib/db/post';
-import { staticPaginationJSON } from '@lib/functions/pagination-list';
+import { getPublishedPosts, paginatePosts } from '@lib/content';
 
 export async function GET(request: NextRequest) {
     try {
@@ -8,26 +7,13 @@ export async function GET(request: NextRequest) {
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '9');
 
-        const allPosts = db.getAll<Post>('posts', '', 1, -1).data;
-        const postData = allPosts.filter(post => post.published === true);
-
-        const { data } = staticPaginationJSON(
-            postData,
-            postData.length,
-            {
-                page: page,
-                limit: limit,
-                search: null,
-                sort: 'asc',
-            }
-        );
-
-        const hasMore = data.length === limit && (page * limit) < postData.length;
+        const published = getPublishedPosts();
+        const { data, total, hasMore } = paginatePosts(published, page, limit);
 
         return NextResponse.json({
             data,
             hasMore,
-            total: postData.length,
+            total,
             page,
             limit
         }, {
@@ -60,35 +46,38 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Generate ID if not provided
-        if (!body.id) {
-            body.id = generateUniqueId();
-        }
+        const fs = await import('fs');
+        const path = await import('path');
+        const matter = await import('gray-matter');
 
-        // Set default values
-        const newPost: Post = {
-            ...body,
+        const slug = body.slug || generateSlug(body.title);
+        const dir = path.join(process.cwd(), 'content', 'posts', slug);
+        fs.mkdirSync(dir, { recursive: true });
+
+        const frontmatter = {
+            title: body.title,
+            slug,
+            description: body.description || '',
+            tags: body.tags || [],
+            authors: body.authors || [],
+            thumbnail: body.thumbnail || '',
             published: body.published ?? false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            slug: body.slug || generateSlug(body.title)
         };
 
-        // Insert the new post
-        const result = db.insert('posts', newPost);
+        const fileContent = matter.default.stringify(body.content || '', frontmatter);
+        fs.writeFileSync(path.join(dir, 'index.md'), fileContent, 'utf8');
 
-        if (result.success) {
-            return NextResponse.json({
-                success: true,
-                data: newPost,
-                message: 'Post created successfully'
-            }, { status: 201 });
-        } else {
-            return NextResponse.json(
-                { error: 'Failed to create post' },
-                { status: 500 }
-            );
-        }
+        // Invalidate cache
+        const { invalidateCache } = await import('@lib/content');
+        invalidateCache();
+
+        return NextResponse.json({
+            success: true,
+            data: { ...frontmatter, id: slug, content: body.content },
+            message: 'Post created successfully'
+        }, { status: 201 });
 
     } catch (error) {
         console.error('Error creating post:', error);
@@ -97,11 +86,6 @@ export async function POST(request: NextRequest) {
             { status: 400 }
         );
     }
-}
-
-// Helper functions
-function generateUniqueId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 function generateSlug(title: string): string {
