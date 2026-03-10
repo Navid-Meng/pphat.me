@@ -1,10 +1,11 @@
+import React from 'react';
 import { Badge } from "@components/ui/badge";
 import { Project } from "../../lib/types/interfaces";
 import Link from "next/link";
 import {ExternalLinkIcon, GlobeIcon} from "@radix-ui/react-icons";
 import { AvatarCircles } from '../ui/avatar-circles';
 
-export const ProjectCard = ({ project }: { project: Project }) => {
+export const ProjectCard = React.memo(({ project }: { project: Project }) => {
     const avatars = project.authors.map((author) => ({
         imageUrl: author.profile,
         profileUrl: author.url,
@@ -56,4 +57,6 @@ export const ProjectCard = ({ project }: { project: Project }) => {
             </footer>
         </div>
     );
-};
+});
+
+ProjectCard.displayName = 'ProjectCard';

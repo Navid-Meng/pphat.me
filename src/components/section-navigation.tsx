@@ -118,21 +118,20 @@ export const SectionNavigation = (
     }, [sections, activeSection, pathname]);
 
     useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
+        let rafId: number;
 
-        const debouncedHandleScroll = () => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(handleScroll, 100);
+        const handleScrollRAF = () => {
+            cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(handleScroll);
         };
 
-        window.addEventListener('scroll', debouncedHandleScroll);
+        window.addEventListener('scroll', handleScrollRAF, { passive: true });
 
-        // Call once on mount to set initial active section
         handleScroll();
 
         return () => {
-            window.removeEventListener('scroll', debouncedHandleScroll);
-            clearTimeout(timeoutId);
+            window.removeEventListener('scroll', handleScrollRAF);
+            cancelAnimationFrame(rafId);
         };
     }, [handleScroll]);
 

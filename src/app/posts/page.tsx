@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import InfiniteScroll from "@components/infinit-scroll";
 import { Spinner } from "@components/ui/loading";
 import { PostCard } from "@components/cards/post-card";
@@ -15,8 +15,8 @@ const Posts = () => {
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [posts, setPosts] = useState<Post[]>([]);
+    const hasFetched = useRef(false);
 
-    // This function depends on page state
     const next = useCallback(async () => {
         if (loading) return;
 
@@ -43,9 +43,11 @@ const Posts = () => {
         }
     }, [loading, page, limit]);
 
-    // Only call next() on initial mount
     useEffect(() => {
-        next();
+        if (!hasFetched.current) {
+            hasFetched.current = true;
+            next();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -55,7 +57,7 @@ const Posts = () => {
             <PostsHero />
             <BlurFade delay={0.9} inView={true}>
                 <article className="grid max-w-5xl mx-auto p-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[300px] relative">
-                    {posts.map((post, index) => (<PostCard key={index} post={{ ...post, createdAt: post.createdAt.toString() }} />))}
+                    {posts.map((post) => (<PostCard key={post.id || post.slug} post={{ ...post, createdAt: post.createdAt.toString() }} />))}
                     <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next} threshold={1}>
                         {hasMore && (
                             <div className='col-span-full flex justify-center items-center'>

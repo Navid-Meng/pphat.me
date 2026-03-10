@@ -36,7 +36,7 @@ export default function Gallery() {
         <section className="max-w-4xl mx-auto py-4">
             <div className="columns-2 gap-4 sm:columns-3">
                 {images.map((item, idx) => (
-                    <BlurFade key={idx} delay={0.25 + idx * 0.05} inView>
+                    <BlurFade key={idx} delay={0.25 + (idx % 6) * 0.05} inView>
                         <Link href={item.link || '#'}
                             aria-label={`View details for ${item.alt}`}
                             className="block mb-4 overflow-hidden rounded-lg hover:opacity-90 transition-opacity">
@@ -46,6 +46,8 @@ export default function Gallery() {
                                 className="size-full rounded-lg object-contain"
                                 width={item.width}
                                 height={item.height}
+                                loading={idx < 6 ? "eager" : "lazy"}
+                                sizes="(max-width: 640px) 50vw, 33vw"
                             />
                             {item.caption && (
                                 <p className="mt-2 sr-only text-sm text-gray-600">{item.caption}</p>

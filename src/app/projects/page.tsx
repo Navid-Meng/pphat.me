@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import originData from 'public/data/project.json';
 import InfiniteScroll from "@components/infinit-scroll";
 import { Spinner } from "@components/ui/loading";
@@ -18,8 +18,8 @@ const Projects = () => {
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [projects, setProjects] = useState<Project[]>([]);
+    const hasFetched = useRef(false);
 
-    // This function depends on page state
     const next = useCallback(async () => {
         if (loading) return;
 
@@ -40,7 +40,11 @@ const Projects = () => {
                 }
             );
 
-            setProjects((prev) => [...prev, ...(data as Project[])]);
+            setProjects((prev) => {
+                const existingIds = new Set(prev.map(p => p.id));
+                const newItems = (data as Project[]).filter(p => !existingIds.has(p.id));
+                return [...prev, ...newItems];
+            });
             setPage((prev) => prev + 1);
 
             if (data.length < limit) setHasMore(false);
@@ -53,9 +57,11 @@ const Projects = () => {
         }
     }, [loading, page, limit]);
 
-    // Only call next() on initial mount
     useEffect(() => {
-        next();
+        if (!hasFetched.current) {
+            hasFetched.current = true;
+            next();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); return (
         <main className="w-full flex flex-col gap-7 pb-5">
@@ -64,7 +70,7 @@ const Projects = () => {
             <ProjectHero />
             <BlurFade delay={0.9} inView={true}>
                 <article className="grid max-w-5xl mx-auto p-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[300px] relative">
-                    {projects.map((project, index) => (<ProjectCard key={index} project={project} />))}
+                    {projects.map((project) => (<ProjectCard key={project.id || project.title} project={project} />))}
                     <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next} threshold={1}>
                         {hasMore && (
                             <div className='col-span-full flex justify-center items-center'>

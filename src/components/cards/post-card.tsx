@@ -2,11 +2,11 @@ import { Badge } from "@components/ui/badge";
 import { Post } from "@lib/db/post";
 import Link from "next/link";
 import Image from 'next/image';
-import { Share2Icon, TagIcon } from "lucide-react";
+import { Share2Icon } from "lucide-react";
 import * as React from 'react';
 import { cn } from "@lib/utils";
 
-export const PostCard = ({ post, actionChildren, className, isAdmin = false }: { post: Post, actionChildren?: React.ReactNode, className?: string, isAdmin?: boolean}) => {
+export const PostCard = React.memo(({ post, actionChildren, className, isAdmin = false }: { post: Post, actionChildren?: React.ReactNode, className?: string, isAdmin?: boolean}) => {
     const sharePost = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -28,6 +28,9 @@ export const PostCard = ({ post, actionChildren, className, isAdmin = false }: {
                 height={512}
                 alt={post.title}
                 className="w-full h-40 aspect-video object-cover rounded-b-xl"
+                loading="lazy"
+                sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
+                unoptimized={post.thumbnail?.startsWith('http')}
             />
 
             <div className="absolute transition-opacity lg:opacity-0 bg-background/50 group-hover:opacity-100 pointer-events-auto rounded-full right-3 top-3 flex z-50">
@@ -76,4 +79,6 @@ export const PostCard = ({ post, actionChildren, className, isAdmin = false }: {
             </div>
         </div>
     );
-};
+});
+
+PostCard.displayName = 'PostCard';

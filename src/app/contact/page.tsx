@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { NavigationBar } from "@components/navbar/navbar";
 import { BlurFade } from '@components/ui/blur-fade';
 import { Label } from "@components/ui/label";
@@ -7,13 +8,14 @@ import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Card, CardContent } from "@components/ui/card";
 import { Textarea, LoadingSpinner } from "@components/ui";
-import { useState, FormEvent, useEffect } from "react";
-import { Send,  AlertCircle } from "lucide-react";
-import { BorderBeam } from "@components/ui/border-beam";
-import { GridPattern } from "@components/ui/grid-pattern";
-import { Ripple } from "@components/ui/ripple";
-import { ContactHero } from "@components/heros/contact-hero";
+import { useState, FormEvent, useCallback } from "react";
+import { Send, AlertCircle } from "lucide-react";
 import { cn } from "@lib/utils";
+
+const BorderBeam = dynamic(() => import("@components/ui/border-beam").then(mod => ({ default: mod.BorderBeam })));
+const GridPattern = dynamic(() => import("@components/ui/grid-pattern").then(mod => ({ default: mod.GridPattern })));
+const Ripple = dynamic(() => import("@components/ui/ripple").then(mod => ({ default: mod.Ripple })));
+const ContactHero = dynamic(() => import("@components/heros/contact-hero").then(mod => ({ default: mod.ContactHero })));
 
 export default function ContactPage() {
     // Form state
@@ -36,11 +38,6 @@ export default function ContactPage() {
         subject?: string;
         message?: string;
     }>({});
-
-    // Clear form errors when user types in a field
-    useEffect(() => {
-        setFormErrors({});
-    }, [formData]);
 
     const validateForm = (): boolean => {
         const errors: typeof formErrors = {};
@@ -76,13 +73,16 @@ export default function ContactPage() {
         return isValid;
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
-    };
+        if (formErrors[name as keyof typeof formErrors]) {
+            setFormErrors(prev => ({ ...prev, [name]: undefined }));
+        }
+    }, [formErrors]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();

@@ -1,6 +1,3 @@
-import { config } from "dotenv"
-config()
-
 export const appName = "LEAT Sophat"
 export const appTitle = "PPhat Dev"
 export const appPositions = ["Senior Front-end Developer.", "UI/UX Designer."]

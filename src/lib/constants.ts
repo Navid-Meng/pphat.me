@@ -1,8 +1,6 @@
 /**
  * Application constants
  */
-import { config } from 'dotenv';
-config()
 
 // Contact information
 export const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'info.sophat@gmail.com';

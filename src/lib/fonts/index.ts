@@ -13,7 +13,7 @@ export const srisakdi = Srisakdi({
     weight: ["400"],
     subsets: ["latin"],
     display: "swap",
-    preload: true,
+    preload: false,
 });
 
 export const poppins = Poppins({
@@ -29,15 +29,15 @@ export const kantumruyPro = Kantumruy_Pro({
     weight: ["400", "500", "600", "700"],
     subsets: ["latin"],
     display: "swap",
-    preload: true,
+    preload: false,
 });
 
 export const openSans = Open_Sans({
     variable: "--font-open-sans",
-    weight: ["400", "500", "600", "700", "800"],
+    weight: ["400", "700"],
     subsets: ["latin"],
     display: "swap",
-    preload: true,
+    preload: false,
 });
 
 export const notoColorEmoji = Noto_Color_Emoji({
@@ -45,5 +45,5 @@ export const notoColorEmoji = Noto_Color_Emoji({
     weight: ["400"],
     subsets: ["emoji"],
     display: "swap",
-    preload: true,
+    preload: false,
 });

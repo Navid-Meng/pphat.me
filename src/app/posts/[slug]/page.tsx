@@ -1,4 +1,5 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { db, Post } from '@lib/db/post';
 import Link from 'next/link';
 import { Metadata } from 'next';
@@ -10,11 +11,16 @@ import { Separator } from '@components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
 import { ArrowLeftIcon, Calendar, Clock, Edit, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { NovelRenderer } from '@components/ui/novel-renderer';
 import Image from 'next/image';
 import "../../../styles/code-block-node.css"
 import { GridPattern } from '@components/ui/grid-pattern';
 import ArticleStructuredData from '@components/data-structured/article';
+
+// Lazy-load the heavy NovelRenderer (tiptap/prosemirror ~200KB+)
+const NovelRenderer = dynamic(
+    () => import('@components/ui/novel-renderer').then(mod => ({ default: mod.NovelRenderer })),
+    { loading: () => <div className="animate-pulse bg-muted rounded-lg h-96" /> }
+);
 
 interface Params {
     params: Promise<{ slug: string; }>;
@@ -118,8 +124,10 @@ export default async function PostDetail(props: Params) {
                                 alt={post.title}
                                 width={800}
                                 height={450}
-                                loading='lazy'
+                                priority
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1024px"
                                 className="w-full h-full object-cover"
+                                unoptimized={post.thumbnail?.startsWith('http')}
                             />
                         </div>
                     )}

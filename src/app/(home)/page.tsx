@@ -1,5 +1,5 @@
 import React from "react";
-import GetInTouchSections from "./sections/home-getintouch";
+import dynamic from "next/dynamic";
 import HeroSection from "@components/heros/home-hero";
 import OrganizationStructuredData from "@components/organization-structured-data";
 import HomePersonStructuredData from "@components/home-person-structured-data";
@@ -7,13 +7,24 @@ import WebsiteStructuredData from "@components/website-structured-data";
 import { Metadata } from "next";
 import { appDescriptions, appName, NEXT_PUBLIC_APP_URL } from "@lib/constants";
 import { BlurFade } from "@components/ui/blur-fade";
-import { HomeSkills } from "./sections/home-skills";
-import { HomeFeatureSection } from "./sections/home-feature";
-import { HomeAboutMe } from "./sections/home-aboutme";
-import { HomeFAQSection } from "./sections/home-faq";
 import { NavigationBar } from "@components/navbar/navbar";
 import { RainbowGlow } from "@components/ui/rainbow-glow";
 import { SectionNavigation } from "@components/section-navigation";
+
+// Lazy-load below-the-fold sections to reduce initial bundle size
+const HomeSkills = dynamic(() => import("./sections/home-skills").then(mod => ({ default: mod.HomeSkills })), {
+    loading: () => <div className="min-h-[200px]" />,
+});
+const HomeFeatureSection = dynamic(() => import("./sections/home-feature").then(mod => ({ default: mod.HomeFeatureSection })), {
+    loading: () => <div className="min-h-[200px]" />,
+});
+const HomeAboutMe = dynamic(() => import("./sections/home-aboutme").then(mod => ({ default: mod.HomeAboutMe })), {
+    loading: () => <div className="min-h-[200px]" />,
+});
+const HomeFAQSection = dynamic(() => import("./sections/home-faq").then(mod => ({ default: mod.HomeFAQSection })), {
+    loading: () => <div className="min-h-[100px]" />,
+});
+const GetInTouchSections = dynamic(() => import("./sections/home-getintouch"));
 
 export const metadata: Metadata = {
     title: appName,

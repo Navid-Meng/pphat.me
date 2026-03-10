@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '9');
 
-        // Use database to get latest posts instead of static import
         const allPosts = db.getAll<Post>('posts', '', 1, -1).data;
         const postData = allPosts.filter(post => post.published === true);
 
@@ -31,6 +30,10 @@ export async function GET(request: NextRequest) {
             total: postData.length,
             page,
             limit
+        }, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+            },
         });
 
     } catch (error) {
