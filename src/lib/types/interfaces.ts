@@ -18,7 +18,7 @@ export interface Post {
     published: boolean;
     description: string;
     tags: string[];
-    createdAt: Date;
+    createdAt: string;
     thumbnail: string;
     slug: string;
     authors: { name: string; profile: string; url: string }[];

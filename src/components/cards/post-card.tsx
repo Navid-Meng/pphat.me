@@ -1,5 +1,5 @@
 import { Badge } from "@components/ui/badge";
-import { Post } from "@lib/db/post";
+import { Post } from "@lib/types/interfaces";
 import Link from "next/link";
 import Image from 'next/image';
 import { Share2Icon } from "lucide-react";

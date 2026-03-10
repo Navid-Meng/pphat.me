@@ -1,14 +1,5 @@
 import { MetadataRoute } from 'next';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-
-interface PostData {
-    id: string;
-    slug: string;
-    published: boolean;
-    createdAt: string;
-    updatedAt?: string;
-}
+import { getPublishedPosts } from '@lib/content';
 
 // This file generates a dynamic sitemap using Next.js API
 // It only includes canonical URLs that return 200 status codes
@@ -60,11 +51,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // Add dynamic post routes
     try {
-        const postsFilePath = join(process.cwd(), 'public/data/post.json');
-        const postsData = JSON.parse(readFileSync(postsFilePath, 'utf-8'));
-        const posts = postsData.posts as PostData[];
-
-        const publishedPosts = posts.filter(post => post.published);
+        const publishedPosts = getPublishedPosts();
 
         const postRoutes: MetadataRoute.Sitemap = publishedPosts.map(post => ({
             url: `${baseUrl}/posts/${post.slug}`,
