@@ -1,0 +1,22 @@
+---
+title: "blog-post"
+slug: "blog-post"
+description: "Personal project for blogging. create for testing purpose."
+image: "https://github.com/pphatdev.png"
+tags: ["Fullstack"]
+languages: ["Laravel", "React"]
+source:
+  - 
+    name: "source"
+    type: "source"
+    url: "https://github.com/pphatdev/blog-post"
+authors:
+  - 
+    name: "pphatdev"
+    profile: "https://github.com/pphatdev.png"
+    url: "https://github.com/pphatdev/blog-post"
+published: true
+createdAt: "2025-03-31T10:12:15.648Z"
+---
+
+Personal project for blogging. create for testing purpose.
