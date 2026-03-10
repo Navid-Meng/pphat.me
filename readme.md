@@ -1,8 +1,9 @@
+![PPhat Dev](./public/assets/cover/home.png)
 
 # 🚀 Installation
 
 ## Prerequisites
-- Node.js (v16 or higher)
+- Node.js (v18 or higher)
 - npm or yarn package manager
 
 ## Setup Instructions
