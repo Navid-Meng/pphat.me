@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Spinner } from "@components/ui/loading";
-import { Post } from "@lib/db/post";
+import { Post } from "@lib/types/interfaces";
 import { BlurFade } from '@components/ui/blur-fade';
 import { NavigationBar } from "@components/navbar/navbar";
 import { PostsHero } from "@components/heros/posts-hero";

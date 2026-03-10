@@ -1,6 +1,6 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { db, Post } from '@lib/db/post';
+import { getPostBySlug, getPublishedPosts, type PostEntry } from '@lib/content';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { appName, NEXT_PUBLIC_APP_URL } from '@lib/constants';
@@ -9,16 +9,15 @@ import { Badge } from '@components/ui/badge';
 import { Button } from '@components/ui/button';
 import { Separator } from '@components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
-import { ArrowLeftIcon, Calendar, Clock, Edit, User } from 'lucide-react';
+import { ArrowLeftIcon, Calendar, Clock, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import "../../../styles/code-block-node.css"
 import { GridPattern } from '@components/ui/grid-pattern';
 import ArticleStructuredData from '@components/data-structured/article';
 
-// Lazy-load the heavy NovelRenderer (tiptap/prosemirror ~200KB+)
-const NovelRenderer = dynamic(
-    () => import('@components/ui/novel-renderer').then(mod => ({ default: mod.NovelRenderer })),
+const MarkdownRenderer = dynamic(
+    () => import('@components/ui/markdown-renderer').then(mod => ({ default: mod.MarkdownRenderer })),
     { loading: () => <div className="animate-pulse bg-muted rounded-lg h-96" /> }
 );
 
@@ -28,8 +27,7 @@ interface Params {
 
 export async function generateMetadata(props: Params): Promise<Metadata> {
     const params = await props.params;
-    const posts = db.query<Post>('posts', (post) => post.slug === params.slug);
-    const post = posts[0];
+    const post = getPostBySlug(params.slug);
 
     if (!post) {
         return {
@@ -66,10 +64,14 @@ export async function generateMetadata(props: Params): Promise<Metadata> {
     };
 }
 
+export async function generateStaticParams() {
+    const posts = getPublishedPosts();
+    return posts.map(post => ({ slug: post.slug }));
+}
+
 export default async function PostDetail(props: Params) {
     const params = await props.params;
-    const posts = db.query<Post>('posts', (post) => post.slug === params.slug);
-    const post = posts[0];
+    const post = getPostBySlug(params.slug);
 
     if (!post) {
         return (
@@ -100,7 +102,7 @@ export default async function PostDetail(props: Params) {
                 authors={post.authors || []}
                 tags={post.tags || []}
                 createdAt={post.createdAt}
-                updatedAt={post.updatedAt?.toString()}
+                updatedAt={post.updatedAt}
                 content={post.content}
             />
 
@@ -134,7 +136,7 @@ export default async function PostDetail(props: Params) {
 
                     <div className="space-y-4 max-xs:px-3">
 
-                        <Link href="/" className="hover:bg-foreground/5 text-primary max-sm:px-3 max-sm:pr-4 max-sm:bg-foreground/5 font-sans transition-all duration-300 max-sm:mt-0 mt-7 items-center max-sm:ring hover:ring w-fit ring-foreground/10 justify-start flex rounded-full hover:px-4 p-1.5">
+                        <Link href="/posts" className="hover:bg-foreground/5 text-primary max-sm:px-3 max-sm:pr-4 max-sm:bg-foreground/5 font-sans transition-all duration-300 max-sm:mt-0 mt-7 items-center max-sm:ring hover:ring w-fit ring-foreground/10 justify-start flex rounded-full hover:px-4 p-1.5">
                             <ArrowLeftIcon className="w-4 h-4 mr-2" /> Back to Articles
                         </Link>
 
@@ -187,13 +189,6 @@ export default async function PostDetail(props: Params) {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* <Button variant="outline" size="sm" asChild>
-                                <Link href={`/admin/posts/${post.id}/edit`}>
-                                    <Edit className="w-4 h-4 mr-2" />
-                                    Edit Post
-                                </Link>
-                            </Button> */}
                         </div>
                     </div>
                 </div>
@@ -202,7 +197,7 @@ export default async function PostDetail(props: Params) {
 
                 {/* Content */}
                 <div className="prose prose-lg mx-auto dark:prose-invert  max-xs:px-3">
-                    <NovelRenderer content={post.content} />
+                    <MarkdownRenderer content={post.content} />
                 </div>
 
                 <Separator className="my-8" />
@@ -220,12 +215,6 @@ export default async function PostDetail(props: Params) {
                     <div className="flex gap-2">
                         <Button variant="outline" asChild>
                             <Link href="/posts">← All Posts</Link>
-                        </Button>
-                        <Button variant="outline" asChild>
-                            <Link href={`/admin/posts/${post.slug}/edit`}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Edit
-                            </Link>
                         </Button>
                     </div>
                 </div>

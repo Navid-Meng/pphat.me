@@ -31,7 +31,11 @@ const Posts = () => {
 
             const { data, hasMore: apiHasMore } = await response.json();
 
-            setPosts((prev) => [...prev, ...(data as Post[])]);
+            setPosts((prev) => {
+                const existingSlugs = new Set(prev.map(p => p.slug));
+                const newPosts = (data as Post[]).filter(p => !existingSlugs.has(p.slug));
+                return [...prev, ...newPosts];
+            });
             setPage((prev) => prev + 1);
             setHasMore(apiHasMore);
 
@@ -57,7 +61,7 @@ const Posts = () => {
             <PostsHero />
             <BlurFade delay={0.9} inView={true}>
                 <article className="grid max-w-5xl mx-auto p-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[300px] relative">
-                    {posts.map((post) => (<PostCard key={post.id || post.slug} post={{ ...post, createdAt: post.createdAt.toString() }} />))}
+                    {posts.map((post) => (<PostCard key={post.id || post.slug} post={post} />))}
                     <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next} threshold={1}>
                         {hasMore && (
                             <div className='col-span-full flex justify-center items-center'>
