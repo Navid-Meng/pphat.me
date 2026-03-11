@@ -11,6 +11,8 @@ interface MarkdownCodeBlockProps {
     children: React.ReactNode;
 }
 
+const CODE_FONT_FAMILY = '"Fira Code", "JetBrains Mono", "Source Code Pro", "Cascadia Code", monospace';
+
 export function MarkdownCodeBlock({ code, language, className, children }: MarkdownCodeBlockProps) {
     const [copied, setCopied] = React.useState(false);
     const copyRef = React.useRef<CopyIconHandle>(null);
@@ -72,7 +74,10 @@ export function MarkdownCodeBlock({ code, language, className, children }: Markd
                     '*:*:max-w-none',
                 )}>
                     <pre>
-                        <code className={cn('font-mono p-3 text-sm leading-relaxed text-slate-50', className)}>
+                        <code
+                            className={cn('font-mono p-3 text-sm leading-relaxed text-slate-50', className)}
+                            style={{ fontFamily: CODE_FONT_FAMILY }}
+                        >
                             {children}
                         </code>
                     </pre>

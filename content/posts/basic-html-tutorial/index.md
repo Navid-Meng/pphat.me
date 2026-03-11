@@ -22,13 +22,13 @@ Welcome! This tutorial will introduce you to the basics of HTML (HyperText Marku
 
 ## **Table of Contents**
 
-1. [What is HTML?](https://github.com/copilot/c/c5f9b6c1-3bab-44bb-a40b-542ceb2d5e03#what-is-html)
-1. [HTML Document Structure](https://github.com/copilot/c/c5f9b6c1-3bab-44bb-a40b-542ceb2d5e03#html-document-structure)
-1. [Common HTML Tags](https://github.com/copilot/c/c5f9b6c1-3bab-44bb-a40b-542ceb2d5e03#common-html-tags)
-1. [Creating Links and Images](https://github.com/copilot/c/c5f9b6c1-3bab-44bb-a40b-542ceb2d5e03#creating-links-and-images)
-1. [Lists in HTML](https://github.com/copilot/c/c5f9b6c1-3bab-44bb-a40b-542ceb2d5e03#lists-in-html)
-1. [Adding Comments](https://github.com/copilot/c/c5f9b6c1-3bab-44bb-a40b-542ceb2d5e03#adding-comments)
-1. [Conclusion](https://github.com/copilot/c/c5f9b6c1-3bab-44bb-a40b-542ceb2d5e03#conclusion)
+1. [What is HTML?](#what-is-html)
+1. [HTML Document Structure](#html-document-structure)
+1. [Common HTML Tags](#common-html-tags)
+1. [Creating Links and Images](#creating-links-and-images)
+1. [Lists in HTML](#lists-in-html)
+1. [Adding Comments](#adding-comments)
+1. [Conclusion](#conclusion)
 
 ---
 
@@ -42,7 +42,7 @@ HTML stands for **HyperText Markup Language**. It is used to create the structur
 
 Every HTML document has a basic structure:
 
-```typescript
+```html
 <!DOCTYPE html>
 <html>
   <head>
@@ -78,7 +78,7 @@ Here are some essential HTML tags:
 
 To link to another page, use the `<a>` tag:
 
-```typescript
+```html
 <a href="https://www.example.com">Visit Example.com</a>
 ```
 
@@ -86,7 +86,7 @@ To link to another page, use the `<a>` tag:
 
 To display an image, use the `<img>` tag:
 
-```typescript
+```html
 <img src="https://www.example.com/image.jpg" alt="Description">
 ```
 
@@ -99,7 +99,7 @@ To display an image, use the `<img>` tag:
 
 ### **Unordered List**
 
-```typescript
+```html
 <ul>
   <li>Item One</li>
   <li>Item Two</li>
@@ -108,7 +108,7 @@ To display an image, use the `<img>` tag:
 
 ### **Ordered List**
 
-```typescript
+```html
 <ol>
   <li>First</li>
   <li>Second</li>
@@ -121,7 +121,7 @@ To display an image, use the `<img>` tag:
 
 Comments are not displayed in the browser. They are useful for notes in your code:
 
-```typescript
+```html
 <!-- This is a comment -->
 ```
 
