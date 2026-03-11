@@ -88,13 +88,6 @@
     }
 }
 
-/* =====================
-   SYNTAX HIGHLIGHTING
-   ===================== */
-.hljs {
-    color: hsl(var(--foreground));
-    background: hsl(var(--muted));
-}
 
 .hljs-comment,
 .hljs-quote {

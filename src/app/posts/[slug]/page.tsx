@@ -1,5 +1,4 @@
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { getPostBySlug, getPublishedPosts, type PostEntry } from '@lib/content';
 import Link from 'next/link';
 import { Metadata } from 'next';
@@ -15,11 +14,7 @@ import Image from 'next/image';
 import "../../../styles/code-block-node.css"
 import { GridPattern } from '@components/ui/grid-pattern';
 import ArticleStructuredData from '@components/data-structured/article';
-
-const MarkdownRenderer = dynamic(
-    () => import('@components/ui/markdown-renderer').then(mod => ({ default: mod.MarkdownRenderer })),
-    { loading: () => <div className="animate-pulse bg-muted rounded-lg h-96" /> }
-);
+import { MarkdownRenderer } from '@components/ui/markdown-renderer';
 
 interface Params {
     params: Promise<{ slug: string; }>;
@@ -196,7 +191,7 @@ export default async function PostDetail(props: Params) {
                 <Separator className="my-8" />
 
                 {/* Content */}
-                <div className="prose prose-lg mx-auto dark:prose-invert  max-xs:px-3">
+                <div className="mx-auto max-xs:px-3">
                     <MarkdownRenderer content={post.content} />
                 </div>
 
