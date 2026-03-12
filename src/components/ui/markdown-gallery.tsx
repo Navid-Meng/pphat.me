@@ -40,7 +40,7 @@ export function MarkdownGallery({
     return (
         <div
             className={cn(
-                'not-prose my-8 columns-1 [column-gap:0.75rem] md:[column-gap:1rem]',
+                'not-prose my-8 columns-2 [column-gap:0.75rem] md:[column-gap:1rem]',
                 getColumnsClass(dataColumns),
                 className
             )}
