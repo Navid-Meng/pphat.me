@@ -83,7 +83,7 @@ export function MarkdownGallery({
         }
     };
 
-    const handleImageClick = (item: React.ReactNode, index: number) => {
+    const handleImageClick = React.useCallback((item: React.ReactNode, index: number) => {
         const imageData = getImageData(item);
         if (imageData?.src) {
             const cleanSrc = removeWidthParam(imageData.src);
@@ -91,19 +91,19 @@ export function MarkdownGallery({
             setCurrentIndex(index);
             setSelectedImage({ src: cleanSrc, alt: imageData.alt || 'Image' });
         }
-    };
+    }, []);
 
-    const handleNext = () => {
+    const handleNext = React.useCallback(() => {
         const nextIndex = (currentIndex + 1) % items.length;
         setImageLoading(true);
         handleImageClick(items[nextIndex], nextIndex);
-    };
+    }, [currentIndex, items, handleImageClick]);
 
-    const handlePrev = () => {
+    const handlePrev = React.useCallback(() => {
         const prevIndex = (currentIndex - 1 + items.length) % items.length;
         setImageLoading(true);
         handleImageClick(items[prevIndex], prevIndex);
-    };
+    }, [currentIndex, items, handleImageClick]);
 
     const handleClose = () => {
         setSelectedImage(null);
@@ -124,7 +124,7 @@ export function MarkdownGallery({
             document.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'unset';
         };
-    }, [selectedImage, currentIndex]);
+    }, [selectedImage, currentIndex, handleNext, handlePrev]);
 
     return (
         <>

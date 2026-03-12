@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo, Suspense } from "react";
 import InfiniteScroll from "@components/infinit-scroll";
 import { Spinner } from "@components/ui/loading";
 import { PostCard } from "@components/cards/post-card";
@@ -10,7 +10,7 @@ import { NavigationBar } from "@components/navbar/navbar";
 import { PostsHero } from "@components/heros/posts-hero";
 import { useSearchParams, useRouter } from "next/navigation";
 
-const Posts = () => {
+const PostsContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const limit = 9;
@@ -130,6 +130,21 @@ const Posts = () => {
                 </article>
             </BlurFade>
         </main>
+    );
+};
+
+const Posts = () => {
+    return (
+        <Suspense fallback={
+            <main className="w-full flex flex-col gap-7 pb-5">
+                <NavigationBar />
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <Spinner variant={'bars'} />
+                </div>
+            </main>
+        }>
+            <PostsContent />
+        </Suspense>
     );
 };
 
