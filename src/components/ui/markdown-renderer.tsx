@@ -7,6 +7,7 @@ import rehypeHighlight from 'rehype-highlight';
 import { cn } from '@lib/utils';
 import { MarkdownCodeBlock } from '@components/ui/markdown-code-block';
 import { MarkdownImage } from '@components/ui/markdown-image';
+import { MarkdownGallery } from '@components/ui/markdown-gallery';
 
 interface MarkdownRendererProps {
     content: string;
@@ -104,6 +105,33 @@ function createMarkdownComponents(): Components {
         img({ src, alt, ...props }) {
             const safeSrc = typeof src === 'string' ? src : undefined;
             return <MarkdownImage src={safeSrc} alt={alt} {...props} />;
+        },
+        div({ className, children, ...props }) {
+            const classValue = typeof className === 'string' ? className : '';
+            const isGallery = classValue.includes('blog-gallery') || classValue.includes('md-gallery');
+
+            if (isGallery) {
+                const galleryProps = props as React.HTMLAttributes<HTMLDivElement> & {
+                    'data-columns'?: string;
+                    'data-captions'?: string;
+                };
+
+                return (
+                    <MarkdownGallery
+                        className={className}
+                        data-columns={galleryProps['data-columns']}
+                        data-captions={galleryProps['data-captions']}
+                    >
+                        {children}
+                    </MarkdownGallery>
+                );
+            }
+
+            return (
+                <div className={className} {...props}>
+                    {children}
+                </div>
+            );
         }
     };
 }
