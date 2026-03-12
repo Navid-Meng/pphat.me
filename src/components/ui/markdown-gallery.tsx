@@ -1,5 +1,8 @@
+"use client";
+
 import React from 'react';
 import { cn } from '@lib/utils';
+import { motion } from 'motion/react';
 
 interface MarkdownGalleryProps extends React.HTMLAttributes<HTMLDivElement> {
     children?: React.ReactNode;
@@ -52,9 +55,17 @@ export function MarkdownGallery({
                     : undefined;
 
                 return (
-                    <figure
+                    <motion.figure
                         key={`gallery-item-${index}`}
                         className="group bg-background/40 border border-border/60 overflow-hidden rounded-2xl p-1 mb-3 md:mb-4 break-inside-avoid [&_img]:h-auto [&_img]:w-full"
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{
+                            duration: 0.5,
+                            delay: index * 0.1,
+                            ease: [0.25, 0.1, 0.25, 1]
+                        }}
                     >
                         <div className="overflow-hidden">{item}</div>
                         {showCaptions && caption ? (
@@ -62,7 +73,7 @@ export function MarkdownGallery({
                                 {caption}
                             </figcaption>
                         ) : null}
-                    </figure>
+                    </motion.figure>
                 );
             })}
         </div>
