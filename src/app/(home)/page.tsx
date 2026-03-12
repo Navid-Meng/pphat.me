@@ -124,7 +124,7 @@ export default function Home() {
                 </BlurFade>
             </section>
 
-            <HomeFAQSection />
+            {/* <HomeFAQSection /> */}
 
             <section id="contact" className="flex flex-col snap-end">
                 <GetInTouchSections />
