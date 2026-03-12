@@ -54,7 +54,7 @@ export function MarkdownGallery({
                 return (
                     <figure
                         key={`gallery-item-${index}`}
-                        className="group bg-background/40 border border-border/60 overflow-hidden rounded-xl mb-3 md:mb-4 break-inside-avoid [&_img]:h-auto [&_img]:w-full"
+                        className="group bg-background/40 border border-border/60 overflow-hidden rounded-2xl p-1 mb-3 md:mb-4 break-inside-avoid [&_img]:h-auto [&_img]:w-full"
                     >
                         <div className="overflow-hidden">{item}</div>
                         {showCaptions && caption ? (
