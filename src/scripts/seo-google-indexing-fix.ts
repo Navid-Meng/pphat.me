@@ -4,11 +4,39 @@ type CheckResult = {
 	details: string;
 };
 
+type ServiceNote = {
+	service: string;
+	details: string;
+};
+
 const GOOGLE_PING_REMOVED_NOTE =
 	'Google no longer supports the public sitemap ping endpoint. Submit or refresh sitemap in Google Search Console instead.';
 
 const BING_PING_REMOVED_NOTE =
 	'Bing legacy sitemap ping endpoints may return 410. Use Bing Webmaster Tools or IndexNow instead.';
+
+function resolveBaseUrl(): string {
+	return (process.env.SEO_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.pphat.me').replace(/\/$/, '');
+}
+
+function getServiceNotes(sitemapUrl: string): ServiceNote[] {
+	const encodedSitemapUrl = encodeURIComponent(sitemapUrl);
+
+	return [
+		{
+			service: 'Google',
+			details: `${GOOGLE_PING_REMOVED_NOTE} Search Console: https://search.google.com/search-console`,
+		},
+		{
+			service: 'Bing',
+			details: `${BING_PING_REMOVED_NOTE} Webmaster Tools: https://www.bing.com/webmasters/about`,
+		},
+		{
+			service: 'Manual Check',
+			details: `Validate sitemap in browser: ${sitemapUrl} | Encoded URL: ${encodedSitemapUrl}`,
+		},
+	];
+}
 
 async function verifySitemapReachability(sitemapUrl: string): Promise<CheckResult> {
 	try {
@@ -90,10 +118,10 @@ async function tryIndexNowSubmission(sitemapUrl: string): Promise<CheckResult> {
 }
 
 export async function runIndexingFix(): Promise<void> {
-	const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://www.pphat.me').replace(/\/$/, '');
+	const baseUrl = resolveBaseUrl();
 	const sitemapUrl = `${baseUrl}/sitemap.xml`;
 
-	console.log(`Pinging search engines with sitemap: ${sitemapUrl}`);
+	console.log(`Checking sitemap indexing readiness for: ${sitemapUrl}`);
 	console.log('----------------------------------------');
 
 	const checks = await Promise.all([
@@ -106,8 +134,9 @@ export async function runIndexingFix(): Promise<void> {
 		console.log(`${icon} ${check.service} - ${check.details}`);
 	});
 
-	console.log(`ℹ️  Google - ${GOOGLE_PING_REMOVED_NOTE}`);
-	console.log(`ℹ️  Bing - ${BING_PING_REMOVED_NOTE}`);
+	getServiceNotes(sitemapUrl).forEach((note) => {
+		console.log(`ℹ️  ${note.service} - ${note.details}`);
+	});
 
 	const strictMode = process.env.STRICT_INDEXING_CHECK === 'true';
 	const hasFailure = checks.some((check) => !check.ok);

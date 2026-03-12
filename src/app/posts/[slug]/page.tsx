@@ -15,6 +15,7 @@ import "../../../styles/code-block-node.css"
 import { GridPattern } from '@components/ui/grid-pattern';
 import ArticleStructuredData from '@components/data-structured/article';
 import { MarkdownRenderer } from '@components/ui/markdown-renderer';
+import { ScrollToTopButton } from '@components/ui/scroll-to-top-button';
 
 interface Params {
     params: Promise<{ slug: string; }>;
@@ -214,6 +215,7 @@ export default async function PostDetail(props: Params) {
                     </div>
                 </div>
             </article>
+            <ScrollToTopButton />
         </>
     );
 }

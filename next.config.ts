@@ -124,6 +124,24 @@ const nextConfig: NextConfig = {
         },
     ],
 
+    rewrites: async () => [
+        {
+            source: '/api/post',
+            has: [
+                {
+                    type: 'query',
+                    key: 'slug',
+                    value: '(?<slug>.*)',
+                },
+            ],
+            destination: '/api/posts/:slug',
+        },
+        {
+            source: '/api/post/:slug',
+            destination: '/api/posts/:slug',
+        },
+    ],
+
     turbopack: {
         rules: {}
     }

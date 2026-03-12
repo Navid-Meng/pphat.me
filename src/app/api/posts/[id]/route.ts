@@ -8,6 +8,26 @@ interface Params {
     params: Promise<{ id: string; }>;
 }
 
+function getMimeType(filePath: string): string {
+    const extension = path.extname(filePath).toLowerCase();
+
+    switch (extension) {
+        case '.jpg':
+        case '.jpeg':
+            return 'image/jpeg';
+        case '.png':
+            return 'image/png';
+        case '.webp':
+            return 'image/webp';
+        case '.gif':
+            return 'image/gif';
+        case '.svg':
+            return 'image/svg+xml';
+        default:
+            return 'application/octet-stream';
+    }
+}
+
 export async function GET(request: NextRequest, props: Params) {
     const params = await props.params;
     try {
@@ -16,6 +36,26 @@ export async function GET(request: NextRequest, props: Params) {
 
         if (!post) {
             return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+        }
+
+        const assetName = request.nextUrl.searchParams.get('asset');
+        if (assetName) {
+            const safeAssetName = path.basename(assetName);
+            const postDir = path.join(process.cwd(), 'content', 'posts', post.slug);
+            const assetPath = path.join(postDir, safeAssetName);
+
+            if (safeAssetName !== assetName || !fs.existsSync(assetPath) || !fs.statSync(assetPath).isFile()) {
+                return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
+            }
+
+            const fileBuffer = fs.readFileSync(assetPath);
+
+            return new NextResponse(new Uint8Array(fileBuffer), {
+                headers: {
+                    'Content-Type': getMimeType(assetPath),
+                    'Cache-Control': 'public, max-age=31536000, immutable',
+                },
+            });
         }
 
         return NextResponse.json(post);

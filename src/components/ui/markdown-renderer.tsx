@@ -7,11 +7,15 @@ import rehypeHighlight from 'rehype-highlight';
 import { cn } from '@lib/utils';
 import { MarkdownCodeBlock } from '@components/ui/markdown-code-block';
 import { MarkdownImage } from '@components/ui/markdown-image';
+import { MarkdownGallery } from '@components/ui/markdown-gallery';
 
 interface MarkdownRendererProps {
     content: string;
     className?: string;
 }
+
+const DEFAULT_HEADING_ID = 'heading';
+const CODE_FONT_FAMILY = '"Fira Code", "JetBrains Mono", "Source Code Pro", "Cascadia Code", monospace';
 
 function extractText(node: React.ReactNode): string {
     if (typeof node === 'string' || typeof node === 'number') {
@@ -29,43 +33,112 @@ function extractText(node: React.ReactNode): string {
     return '';
 }
 
-const markdownComponents: Components = {
-    pre({ children }) {
-        return <>{children}</>;
-    },
-    code({ className, children, ...props }) {
-        const languageMatch = /language-([a-z0-9-]+)/i.exec(className || '');
-        const codeText = extractText(children).replace(/\n$/, '');
-        const isBlock = Boolean(languageMatch) || codeText.includes('\n');
+function createHeadingId(text: string): string {
+    const slug = text
+        .trim()
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
 
-        if (!isBlock) {
+    return slug || DEFAULT_HEADING_ID;
+}
+
+function createMarkdownComponents(): Components {
+    const headingCounts = new Map<string, number>();
+
+    type HeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
+    const withHeadingId =
+        (Tag: HeadingTag) =>
+        function HeadingWithId({ id, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+            const text = extractText(children).trim();
+            const baseId = typeof id === 'string' && id.length > 0 ? id : createHeadingId(text);
+            const count = headingCounts.get(baseId) ?? 0;
+            headingCounts.set(baseId, count + 1);
+
+            const uniqueId = count === 0 ? baseId : `${baseId}-${count + 1}`;
+
+            return React.createElement(Tag, { ...props, id: uniqueId }, children);
+        };
+
+    return {
+        pre({ children }) {
+            return <>{children}</>;
+        },
+        code({ className, children, ...props }) {
+            const languageMatch = /language-([a-z0-9-]+)/i.exec(className || '');
+            const codeText = extractText(children).replace(/\n$/, '');
+            const isBlock = Boolean(languageMatch) || codeText.includes('\n');
+
+            if (!isBlock) {
+                return (
+                    <code
+                        className={cn('rounded bg-muted px-1 py-0.5 font-mono text-sm', className)}
+                        style={{ fontFamily: CODE_FONT_FAMILY }}
+                        {...props}
+                    >
+                        {children}
+                    </code>
+                );
+            }
+
             return (
-                <code
-                    className={cn('rounded bg-muted px-1 py-0.5 font-mono text-sm', className)}
-                    {...props}
+                <MarkdownCodeBlock
+                    code={codeText}
+                    language={languageMatch?.[1]}
+                    className={className}
                 >
                     {children}
-                </code>
+                </MarkdownCodeBlock>
+            );
+        },
+        h1: withHeadingId('h1'),
+        h2: withHeadingId('h2'),
+        h3: withHeadingId('h3'),
+        h4: withHeadingId('h4'),
+        h5: withHeadingId('h5'),
+        h6: withHeadingId('h6'),
+        img({ src, alt, ...props }) {
+            const safeSrc = typeof src === 'string' ? src : undefined;
+            return <MarkdownImage src={safeSrc} alt={alt} {...props} />;
+        },
+        div({ className, children, ...props }) {
+            const classValue = typeof className === 'string' ? className : '';
+            const isGallery = classValue.includes('blog-gallery') || classValue.includes('md-gallery');
+
+            if (isGallery) {
+                const galleryProps = props as React.HTMLAttributes<HTMLDivElement> & {
+                    'data-columns'?: string;
+                    'data-captions'?: string;
+                };
+
+                return (
+                    <MarkdownGallery
+                        className={className}
+                        data-columns={galleryProps['data-columns']}
+                        data-captions={galleryProps['data-captions']}
+                    >
+                        {children}
+                    </MarkdownGallery>
+                );
+            }
+
+            return (
+                <div className={className} {...props}>
+                    {children}
+                </div>
             );
         }
-
-        return (
-            <MarkdownCodeBlock
-                code={codeText}
-                language={languageMatch?.[1]}
-                className={className}
-            >
-                {children}
-            </MarkdownCodeBlock>
-        );
-    },
-    img({ src, alt, ...props }) {
-        const safeSrc = typeof src === 'string' ? src : undefined;
-        return <MarkdownImage src={safeSrc} alt={alt} {...props} />;
-    }
-};
+    };
+}
 
 export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
+    const markdownComponents = createMarkdownComponents();
+
     return (
         <div
             className={cn(
