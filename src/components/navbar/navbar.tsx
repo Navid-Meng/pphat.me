@@ -7,6 +7,9 @@ import { cn } from "@lib/utils";
 import Link from "next/link"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
+import { Button } from "../ui";
+import { ContactIcon, Newspaper, UserIcon } from "lucide-react";
+import { GitCompareArrowsIcon } from "src/app/components/ui/git-compare-arrows";
 
 export const NavigationBar = (
     { className }: { className?: string },
@@ -15,20 +18,24 @@ export const NavigationBar = (
         {
             name: "Contributes",
             link: "/projects",
+            icon: GitCompareArrowsIcon,
             active: pathname === "/projects",
         },
         {
             name: "Articles",
             link: "/posts",
+            icon: Newspaper,
             active: pathname.startsWith("/posts"),
         },
         {
             name: "About me",
             link: "/about",
+            icon: UserIcon,
             active: pathname === "/about",
         }, {
             name: "Contact",
             link: "/contact",
+            icon: ContactIcon,
             active: pathname === "/contact",
         },
     ]
@@ -36,7 +43,7 @@ export const NavigationBar = (
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
-        <Navbar className={cn("max-w-5xl mx-auto justify-end", className)}>
+        <Navbar className={cn("max-w-5xl mx-auto justify-center", className)}>
             {/* Desktop Navigation */}
             <NavBody>
                 <NavbarLogo />
@@ -61,25 +68,25 @@ export const NavigationBar = (
                 <MobileNavMenu
                     isOpen={isMobileMenuOpen}
                     onClose={() => setIsMobileMenuOpen(false)}
+                    className="px-7 rounded-3xl"
                 >
-                    <ol>
+                    <ol className="w-full flex flex-col items-center justify-center gap-2">
                         {navItems.map((item, idx) => (
-                            <li key={idx}>
-                                <Link
-                                    key={`mobile-link-${idx}`}
-                                    href={item.link}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className={cn(
-                                        "relative text-foreground/300 active:text-primary py-2 hover:text-primary rounded-full hover:bg-foreground/5 w-full text-center active:bg-foreground/5 transition-colors duration-200",
-                                        item.active ? "text-primary bg-foreground/5" : "text-foreground/300",
-                                    )}
-                                >
-                                    <span className="block">{item.name}</span>
-                                </Link>
+                            <li key={idx} className="w-full px-5">
+                                <Button asChild className={cn("w-full text-foreground", item.active && "text-primary")}>
+                                    <Link href={item.link} onClick={() => setIsMobileMenuOpen(false)}>
+                                        <item.icon className="w-4 h-4 mr-1" /> {item.name}
+                                    </Link>
+                                </Button>
                             </li>
                         ))}
                     </ol>
-                    <div className="flex w-full items-center justify-center mt-5 flex-col gap-4">
+                    <div className="flex w-full items-center justify-center mt-5 gap-4">
+
+                        <MagneticArea>
+                            <ThemeToggle className="scale-90" />
+                        </MagneticArea>
+
                         <MagneticArea>
                             <Link aria-label="GitHub repository" href="https://github.com/pphatdev">
                                 <svg
@@ -94,6 +101,7 @@ export const NavigationBar = (
                                 </svg>
                             </Link>
                         </MagneticArea>
+
                     </div>
                 </MobileNavMenu>
             </MobileNav>
