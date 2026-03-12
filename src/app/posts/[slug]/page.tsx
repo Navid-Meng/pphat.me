@@ -72,14 +72,24 @@ export default async function PostDetail(props: Params) {
     if (!post) {
         return (
             <>
+                <GridPattern
+                    width={30}
+                    height={30}
+                    x={-1}
+                    y={-1}
+                    className={"[mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)] "}
+                />
                 <NavigationBar className='sticky' />
-                <div className="container mx-auto py-16 text-center">
+                <div className="container flex min-h-svh flex-col justify-center items-center mx-auto py-16 text-center">
                     <h1 className="text-4xl font-bold mb-4">Post Not Found</h1>
                     <p className="text-muted-foreground mb-8">
                         The article you're looking for doesn't exist.
                     </p>
-                    <Button asChild>
-                        <Link href="/posts">Back to Posts</Link>
+
+                    <Button asChild className='ring'>
+                        <Link href="/posts">
+                            <ArrowLeftIcon className="w-4 h-4 mr-2" /> Back to Articles
+                        </Link>
                     </Button>
                 </div>
             </>
@@ -114,7 +124,7 @@ export default async function PostDetail(props: Params) {
             </div>
             <article className="max-w-5xl sm:px-4 mx-auto max-xs:pt-0 sm:mt-16 py-8">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-6">
                     {post.thumbnail && (
                         <div className="relative w-full h-full max-xs:max-h-96 md:h-[29rem] mb-6 max-xs:rounded-none max-xs:rounded-b-4xl rounded-2xl overflow-hidden">
                             <Image
@@ -132,10 +142,11 @@ export default async function PostDetail(props: Params) {
 
                     <div className="space-y-4 max-xs:px-3">
 
-                        <Link href="/posts" className="hover:bg-foreground/5 text-primary max-sm:px-3 max-sm:pr-4 max-sm:bg-foreground/5 font-sans transition-all duration-300 max-sm:mt-0 mt-7 items-center max-sm:ring hover:ring w-fit ring-foreground/10 justify-start flex rounded-full hover:px-4 p-1.5">
-                            <ArrowLeftIcon className="w-4 h-4 mr-2" /> Back to Articles
-                        </Link>
-
+                        <Button asChild>
+                            <Link href="/posts">
+                                <ArrowLeftIcon className="w-4 h-4 mr-2" /> Back to Articles
+                            </Link>
+                        </Button>
 
                         <h1 className="text-4xl md:text-5xl font-bold leading-tight">
                             {post.title}
@@ -149,7 +160,7 @@ export default async function PostDetail(props: Params) {
                             ))}
                         </div>
 
-                        <div className="flex max-sm:flex-col items-center justify-between gap-4">
+                        <div className="flex mt-5 max-sm:flex-col items-center justify-between gap-4">
                             <div className="flex max-xs:flex-col max-sm:items-center max-sm:justify-center w-full items-center space-x-4">
                                 {post.authors?.map((author, index) => (
                                     <div key={index} className="flex items-center space-x-2">
@@ -196,7 +207,7 @@ export default async function PostDetail(props: Params) {
                     <MarkdownRenderer content={post.content} />
                 </div>
 
-                <Separator className="my-8" />
+                {/* <Separator className="my-8" /> */}
 
                 {/* Footer */}
                 <div className="flex items-center mx-auto justify-between max-xs:px-3">
@@ -209,8 +220,14 @@ export default async function PostDetail(props: Params) {
                     </div>
 
                     <div className="flex gap-2">
-                        <Button variant="outline" asChild>
+                        {/* <Button variant="outline" asChild>
                             <Link href="/posts">← All Posts</Link>
+                        </Button> */}
+
+                        <Button asChild>
+                            <Link href="/posts">
+                                <ArrowLeftIcon className="w-4 h-4 mr-2" /> All Articles
+                            </Link>
                         </Button>
                     </div>
                 </div>
