@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from '@lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, RotateCw, Download } from 'lucide-react';
 import Image from 'next/image';
 
 interface MarkdownGalleryProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -36,6 +36,7 @@ export function MarkdownGallery({
     const [selectedImage, setSelectedImage] = React.useState<{ src: string; alt: string; } | null>(null);
     const [currentIndex, setCurrentIndex] = React.useState<number>(0);
     const [imageLoading, setImageLoading] = React.useState(false);
+    const [rotation, setRotation] = React.useState<number>(0);
     const showCaptions = dataCaptions === 'true';
     const items = React.Children.toArray(children).filter((child) => {
         if (typeof child === 'string') {
@@ -89,6 +90,7 @@ export function MarkdownGallery({
             const cleanSrc = removeWidthParam(imageData.src);
             setImageLoading(true);
             setCurrentIndex(index);
+            setRotation(0);
             setSelectedImage({ src: cleanSrc, alt: imageData.alt || 'Image' });
         }
     }, []);
@@ -108,6 +110,30 @@ export function MarkdownGallery({
     const handleClose = () => {
         setSelectedImage(null);
         setImageLoading(false);
+        setRotation(0);
+    };
+
+    const handleRotate = () => {
+        setRotation((prev) => (prev + 90) % 360);
+    };
+
+    const handleDownload = async () => {
+        if (!selectedImage) return;
+        
+        try {
+            const response = await fetch(selectedImage.src);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = selectedImage.alt || 'image';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading image:', error);
+        }
     };
 
     React.useEffect(() => {
@@ -115,6 +141,7 @@ export function MarkdownGallery({
             if (e.key === 'Escape') handleClose();
             if (e.key === 'ArrowRight') handleNext();
             if (e.key === 'ArrowLeft') handlePrev();
+            if (e.key === 'r' || e.key === 'R') handleRotate();
         };
         if (selectedImage) {
             document.addEventListener('keydown', handleKeyDown);
@@ -176,13 +203,36 @@ export function MarkdownGallery({
                         exit={{ opacity: 0 }}
                         onClick={handleClose}
                     >
-                        <button
-                            onClick={handleClose}
-                            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-background/20 hover:bg-background/30 transition-colors"
-                            aria-label="Close preview"
-                        >
-                            <X className="w-6 h-6 text-white" />
-                        </button>
+                        {/* Top Controls */}
+                        <div className="absolute top-4 right-4 z-10 flex gap-2">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownload();
+                                }}
+                                className="p-2 rounded-full bg-background/20 hover:bg-background/30 transition-colors"
+                                aria-label="Download image"
+                            >
+                                <Download className="w-6 h-6 text-white" />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRotate();
+                                }}
+                                className="p-2 rounded-full bg-background/20 hover:bg-background/30 transition-colors"
+                                aria-label="Rotate image"
+                            >
+                                <RotateCw className="w-6 h-6 text-white" />
+                            </button>
+                            <button
+                                onClick={handleClose}
+                                className="p-2 rounded-full bg-background/20 hover:bg-background/30 transition-colors"
+                                aria-label="Close preview"
+                            >
+                                <X className="w-6 h-6 text-white" />
+                            </button>
+                        </div>
                         
                         {/* Navigation Buttons */}
                         {items.length > 1 && (
@@ -227,6 +277,10 @@ export function MarkdownGallery({
                                 alt={selectedImage.alt}
                                 width={1920}
                                 height={1080}
+                                style={{
+                                    transform: `rotate(${rotation}deg)`,
+                                    transition: 'transform 0.3s ease-in-out'
+                                }}
                                 className={cn(
                                     "max-w-full max-h-full w-auto h-auto object-contain rounded-lg transition-opacity duration-300",
                                     imageLoading ? "opacity-0" : "opacity-100"
