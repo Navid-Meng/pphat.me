@@ -14,6 +14,7 @@ import Image from 'next/image';
 import "../../../styles/code-block-node.css"
 import { GridPattern } from '@components/ui/grid-pattern';
 import ArticleStructuredData from '@components/data-structured/article';
+import BreadcrumbStructuredData from '@components/breadcrumb-structured-data';
 import { MarkdownRenderer } from '@components/ui/markdown-renderer';
 import { ScrollToTopButton } from '@components/ui/scroll-to-top-button';
 
@@ -111,6 +112,11 @@ export default async function PostDetail(props: Params) {
                 updatedAt={post.updatedAt}
                 content={post.content}
             />
+            <BreadcrumbStructuredData items={[
+                { name: 'Home', url: NEXT_PUBLIC_APP_URL, position: 1 },
+                { name: 'Posts', url: `${NEXT_PUBLIC_APP_URL}/posts`, position: 2 },
+                { name: post.title, url: `${NEXT_PUBLIC_APP_URL}/posts/${post.slug}`, position: 3 },
+            ]} />
 
             <NavigationBar className='fixed' />
             <div className="absolute inset-y-0 left-0 right-0 pointer-events-none opacity-60" aria-hidden="true">

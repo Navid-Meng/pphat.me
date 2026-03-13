@@ -55,7 +55,7 @@ export default function ArticleStructuredData({
 
     const structuredData = {
         "@context": "https://schema.org",
-        "@type": "Article",
+        "@type": "BlogPosting",
         "@id": `${NEXT_PUBLIC_APP_URL}/posts/${slug}`,
         "headline": title,
         "description": description,
