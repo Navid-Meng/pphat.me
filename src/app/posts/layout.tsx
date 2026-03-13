@@ -1,5 +1,8 @@
+import React from 'react';
 import { Metadata } from 'next';
 import postsMeta from '@lib/meta/posts';
+import BreadcrumbStructuredData from '@components/breadcrumb-structured-data';
+import { NEXT_PUBLIC_APP_URL } from '@lib/constants';
 
 export const metadata: Metadata = {
     ...postsMeta,
@@ -13,5 +16,13 @@ export const metadata: Metadata = {
 export default function PostsLayout({ children, }: {
     children: React.ReactNode;
 }) {
-    return (<> {children} </>);
+    return (
+        <>
+            <BreadcrumbStructuredData items={[
+                { name: 'Home', url: NEXT_PUBLIC_APP_URL, position: 1 },
+                { name: 'Posts', url: `${NEXT_PUBLIC_APP_URL}/posts`, position: 2 },
+            ]} />
+            {children}
+        </>
+    );
 }

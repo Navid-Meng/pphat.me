@@ -5,6 +5,7 @@ import { BlurFade } from '@components/ui/blur-fade';
 import { Metadata } from "next";
 import { appName, NEXT_PUBLIC_APP_URL } from "@lib/constants";
 import AboutStructuredData from "@components/about-structured-data";
+import BreadcrumbStructuredData from "@components/breadcrumb-structured-data";
 
 const appPositions = ["I'm a Senior Front-end Developer", "and a Freelance UI/UX Designer."];
 const description = `My name is <span className="text-primary font-semibold">Leat Sophat</span>, also known as <span className="text-primary font-semibold">PPhat</span>.
@@ -47,6 +48,10 @@ const AboutPage = () => {
     return (
         <main className="w-full flex flex-col gap-7 pb-5">
             <AboutStructuredData />
+            <BreadcrumbStructuredData items={[
+                { name: 'Home', url: NEXT_PUBLIC_APP_URL, position: 1 },
+                { name: 'About', url: `${NEXT_PUBLIC_APP_URL}/about`, position: 2 },
+            ]} />
             <AboutMeHero description={description} appPositions={appPositions} />
             <NavigationBar />
 
