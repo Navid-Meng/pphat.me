@@ -49,9 +49,27 @@ export default function ArticleStructuredData({
         }
     };
 
+    const formatDateTimeWithOffset = (dateInput: string): string => {
+        const date = new Date(dateInput);
+
+        if (Number.isNaN(date.getTime())) {
+            return dateInput;
+        }
+
+        const pad = (value: number): string => String(value).padStart(2, '0');
+        const offsetMinutes = -date.getTimezoneOffset();
+        const sign = offsetMinutes >= 0 ? '+' : '-';
+        const offsetHours = pad(Math.floor(Math.abs(offsetMinutes) / 60));
+        const offsetRemainderMinutes = pad(Math.abs(offsetMinutes) % 60);
+
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${offsetHours}:${offsetRemainderMinutes}`;
+    };
+
     const plainTextContent = getPlainTextContent(content);
     const wordCount = plainTextContent.split(/\s+/).filter(word => word.length > 0).length;
     const readingTime = Math.ceil(wordCount / 200); // Assume 200 words per minute
+    const publishedDate = formatDateTimeWithOffset(createdAt);
+    const modifiedDate = formatDateTimeWithOffset(updatedAt || createdAt);
 
     const structuredData = {
         "@context": "https://schema.org",
@@ -60,8 +78,8 @@ export default function ArticleStructuredData({
         "headline": title,
         "description": description,
         "url": `${NEXT_PUBLIC_APP_URL}/posts/${slug}`,
-        "datePublished": createdAt,
-        "dateModified": updatedAt || createdAt,
+        "datePublished": publishedDate,
+        "dateModified": modifiedDate,
         "wordCount": wordCount,
         "timeRequired": `PT${readingTime}M`,
         "articleBody": plainTextContent.substring(0, 500) + (plainTextContent.length > 500 ? '...' : ''),

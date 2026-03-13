@@ -18,8 +18,8 @@ export default function AboutStructuredData() {
         "name": `About ${appName}`,
         "description": `I'm ${PERSON_NAME} (${PERSON_ALTERNATE_NAME}), a ${PERSON_JOB_TITLE}.`,
         "url": `${NEXT_PUBLIC_APP_URL}/about`,
-        "dateCreated": "2021-01-01",
-        "dateModified": new Date().toISOString().split('T')[0],
+        "dateCreated": "2021-01-01T00:00:00Z",
+        "dateModified": new Date().toISOString(),
         "mainEntity": {
             "@type": "Person",
             "@id": `${NEXT_PUBLIC_APP_URL}#person`,
