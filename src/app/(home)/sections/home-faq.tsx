@@ -1,4 +1,5 @@
 import { FaqSection } from "@components/ui/faq";
+import FAQPageStructuredData from "@components/data-structured/faq-page";
 
 export const HomeFAQSection = () => {
     const data = [
@@ -17,10 +18,13 @@ export const HomeFAQSection = () => {
     ];
 
     return (
-        <FaqSection
-            title="Frequently Asked Questions"
-            description="Everything about this projects."
-            items={data}
-        />
+        <>
+            <FAQPageStructuredData items={data} />
+            <FaqSection
+                title="Frequently Asked Questions"
+                description="Everything about this projects."
+                items={data}
+            />
+        </>
     );
 }
