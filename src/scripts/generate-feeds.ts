@@ -135,7 +135,7 @@ function buildRss(posts: PostData[], baseUrl: string): string {
                 `    <guid isPermaLink=\"true\">${xmlEscape(postUrl)}</guid>`,
                 `    <pubDate>${toRfc2822(published)}</pubDate>`,
                 `    <description>${toCdata(description)}</description>`,
-                `    <enclosure url=\"${xmlEscape(thumbnail)}\" type=\"${imageType}\" />`,
+                `    <enclosure url=\"${xmlEscape(thumbnail)}\" length=\"0\" type=\"${imageType}\" />`,
                 `    <media:content url=\"${xmlEscape(thumbnail)}\" medium=\"image\" type=\"${imageType}\" />`,
                 `    <media:thumbnail url=\"${xmlEscape(thumbnail)}\" />`,
                 `    <dc:date>${toIso(updatedAt)}</dc:date>`,
