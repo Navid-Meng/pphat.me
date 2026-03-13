@@ -6,7 +6,6 @@ import { ThemeProvider } from 'next-themes'
 import { homeHome } from "../lib/meta/home";
 import { aladin, kantumruyPro, poppins, srisakdi, openSans } from "../lib/fonts";
 import { cn } from "../lib/utils";
-import CanonicalURL from "../components/canonical-url";
 import GoogleIndexingVerification from "../components/google-indexing-verification";
 export { viewport } from "../lib/meta/viewport";
 export const metadata: Metadata = homeHome;
@@ -21,12 +20,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     rel="stylesheet"
                     href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500;600;700&display=swap"
                 />
-                <link rel="dns-prefetch" href="https://www.pphat.me" />
-                <CanonicalURL />
+                <link rel="dns-prefetch" href="https://pphat.me" />
                 <GoogleIndexingVerification />
-                <link rel="alternate" type="application/rss+xml" title="PPhat Dev RSS" href="https://www.pphat.me/rss.xml" />
-                <link rel="alternate" type="application/atom+xml" title="PPhat Dev Atom" href="https://www.pphat.me/atom.xml" />
-                <link rel="alternate" type="application/feed+json" title="PPhat Dev JSON Feed" href="https://www.pphat.me/feed.json" />
+                <link rel="alternate" type="application/rss+xml" title="PPhat Dev RSS" href="https://pphat.me/rss.xml" />
+                <link rel="alternate" type="application/atom+xml" title="PPhat Dev Atom" href="https://pphat.me/atom.xml" />
+                <link rel="alternate" type="application/feed+json" title="PPhat Dev JSON Feed" href="https://pphat.me/feed.json" />
                 <meta name="priority" content="1.0" />
                 <meta name="revisit-after" content="1 day" />
             </head>

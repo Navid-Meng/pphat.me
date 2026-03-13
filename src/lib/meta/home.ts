@@ -38,9 +38,6 @@ export const homeHome: Metadata = {
             'max-snippet': -1,
         },
     },
-    alternates: {
-        canonical: NEXT_PUBLIC_APP_URL,
-    },
     openGraph: {
         type: "profile",
         url: new URL(NEXT_PUBLIC_APP_URL),

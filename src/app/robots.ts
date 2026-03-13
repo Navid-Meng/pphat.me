@@ -28,7 +28,7 @@ export default function robots(): MetadataRoute.Robots {
                 ],
             },
         ],
-        sitemap: 'https://www.pphat.me/sitemap.xml',
-        host: 'https://www.pphat.me',
+        sitemap: 'https://pphat.me/sitemap.xml',
+        host: 'https://pphat.me',
     };
 }
