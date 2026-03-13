@@ -91,9 +91,9 @@ export default function HeroSection() {
 
                     <BlurFade delay={0.70} inView>
                         <nav className="flex flex-col z-50 justify-center sm:justify-start sm:flex-row items-center gap-4 mt-6 max-md:px-3">
-                            <MagneticArea>
+                            {/* <MagneticArea>
                                 <ThemeToggle />
-                            </MagneticArea>
+                            </MagneticArea> */}
                         </nav>
                     </BlurFade>
                 </div>

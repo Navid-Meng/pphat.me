@@ -17,6 +17,7 @@ const Posts = () => {
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState<Post[]>([]);
     const [totalPages, setTotalPages] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
     const [pagination, setPagination] = useState({
         hasNextPage: false,
         hasPreviousPage: false,
@@ -117,7 +118,11 @@ const Posts = () => {
     return (
         <main className="w-full flex flex-col gap-7 pb-5">
             <NavigationBar />
-            <PostsHero />
+            <PostsHero 
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onClearSearch={() => setSearchQuery('')}
+            />
             <BlurFade delay={0.9} inView={true}>
                 <article className="grid max-w-5xl mx-auto p-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[300px] relative">
                     {loading ? (

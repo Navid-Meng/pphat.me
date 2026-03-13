@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo, Suspense } from "react";
 import InfiniteScroll from "@components/infinit-scroll";
 import { Spinner } from "@components/ui/loading";
 import { PostCard } from "@components/cards/post-card";
@@ -8,13 +8,17 @@ import { Post } from "../../lib/types/interfaces";
 import { BlurFade } from '@components/ui/blur-fade';
 import { NavigationBar } from "@components/navbar/navbar";
 import { PostsHero } from "@components/heros/posts-hero";
+import { useSearchParams, useRouter } from "next/navigation";
 
-const Posts = () => {
+const PostsContent = () => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const limit = 9;
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [posts, setPosts] = useState<Post[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const hasFetched = useRef(false);
 
     const next = useCallback(async () => {
@@ -55,15 +59,69 @@ const Posts = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Sync search query with URL params on mount and when URL changes
+    useEffect(() => {
+        const queryParam = searchParams.get('q') || "";
+        setSearchQuery(queryParam);
+    }, [searchParams]);
+
+    const filteredPosts = useMemo(() => {
+        if (!searchQuery.trim()) return posts;
+
+        const query = searchQuery.toLowerCase();
+        return posts.filter(post => 
+            post.title?.toLowerCase().includes(query) ||
+            post.description?.toLowerCase().includes(query) ||
+            post.tags?.some(tag => tag.toLowerCase().includes(query))
+        );
+    }, [posts, searchQuery]);
+
+    const updateSearchParams = useCallback((query: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (query.trim()) {
+            params.set('q', query);
+        } else {
+            params.delete('q');
+        }
+        const queryString = params.toString();
+        router.push(`/posts${queryString ? `?${queryString}` : ''}`, { scroll: false });
+    }, [router, searchParams]);
+
+    const handleSearchChange = useCallback((value: string) => {
+        setSearchQuery(value);
+        updateSearchParams(value);
+    }, [updateSearchParams]);
+
+    const clearSearch = useCallback(() => {
+        setSearchQuery("");
+        updateSearchParams("");
+    }, [updateSearchParams]);
+
     return (
         <main className="w-full flex flex-col gap-7 pb-5">
             <NavigationBar />
-            <PostsHero />
+            <PostsHero 
+                searchQuery={searchQuery}
+                onSearchChange={handleSearchChange}
+                onClearSearch={clearSearch}
+            />
             <BlurFade delay={0.9} inView={true}>
+                {searchQuery && (
+                    <div className="max-w-5xl mx-auto w-full px-5">
+                        <p className="text-sm text-muted-foreground mb-4">
+                            Found {filteredPosts.length} article{filteredPosts.length !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                )}
                 <article className="grid max-w-5xl mx-auto p-5 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[300px] relative">
-                    {posts.map((post) => (<PostCard key={post.id || post.slug} post={post} />))}
+                    {filteredPosts.map((post) => (<PostCard key={post.id || post.slug} post={post} />))}
+                    {filteredPosts.length === 0 && searchQuery && (
+                        <div className="col-span-full text-center py-12">
+                            <p className="text-muted-foreground text-lg">No articles found matching "{searchQuery}"</p>
+                        </div>
+                    )}
                     <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next} threshold={1}>
-                        {hasMore && (
+                        {hasMore && !searchQuery && (
                             <div className='col-span-full flex justify-center items-center'>
                                 <Spinner variant={'bars'} />
                             </div>
@@ -72,6 +130,21 @@ const Posts = () => {
                 </article>
             </BlurFade>
         </main>
+    );
+};
+
+const Posts = () => {
+    return (
+        <Suspense fallback={
+            <main className="w-full flex flex-col gap-7 pb-5">
+                <NavigationBar />
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <Spinner variant={'bars'} />
+                </div>
+            </main>
+        }>
+            <PostsContent />
+        </Suspense>
     );
 };
 

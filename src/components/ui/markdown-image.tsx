@@ -34,7 +34,7 @@ export function MarkdownImage({ src, alt, className, fallbackSrc = DEFAULT_FALLB
             onError={handleError}
             loading="lazy"
             unoptimized
-            className={['rounded-lg shadow-md w-full h-auto', className].filter(Boolean).join(' ')}
+            className={['rounded-xl w-full h-auto', className].filter(Boolean).join(' ')}
         />
     );
 }
